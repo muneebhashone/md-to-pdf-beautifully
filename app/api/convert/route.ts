@@ -39,6 +39,18 @@ export async function POST(request: NextRequest) {
     const entry = pickEntry(vfs);
     const { html: body, title } = await renderBundle(vfs, entry);
     const html = buildHtml({ title, body });
+
+    const mode = request.nextUrl.searchParams.get("mode");
+    if (mode === "preview") {
+      return new Response(html, {
+        status: 200,
+        headers: {
+          "Content-Type": "text/html; charset=utf-8",
+          "Cache-Control": "no-store",
+        },
+      });
+    }
+
     const pdf = await htmlToPdf(html);
 
     const stem = entry.replace(/^.*[\\/]/, "").replace(/\.(md|markdown)$/i, "");

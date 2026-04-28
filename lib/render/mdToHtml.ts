@@ -83,6 +83,9 @@ const rewriteLinksAndImages =
             node.properties.href = "#" + slug + (hash ? "--" + hash : "");
             return;
           }
+          const rewritten = pathPart.replace(/\.(md|markdown)$/i, ".pdf");
+          node.properties.href = rewritten + (hash ? "#" + hash : "");
+          return;
         }
         if (!pathPart && hash) {
           // same-file anchor; leave as-is but prefix with current file slug for global uniqueness

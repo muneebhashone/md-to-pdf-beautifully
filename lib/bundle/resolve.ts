@@ -23,7 +23,7 @@ export function fileSlug(filePath: string): string {
 }
 
 export function isExternal(href: string): boolean {
-  return /^([a-z]+:|\/\/|mailto:|tel:|#)/i.test(href);
+  return /^([a-z]+:|\/\/|mailto:|tel:)/i.test(href);
 }
 
 export function resolveRel(fromFile: string, target: string): string {

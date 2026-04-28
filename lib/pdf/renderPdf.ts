@@ -11,11 +11,9 @@ export async function htmlToPdf(html: string): Promise<Buffer> {
     await page.goto(dataUrl, { waitUntil: "networkidle0", timeout: 45000 });
     // Wait for fonts and mermaid to settle
     await page.evaluate(async () => {
-      // @ts-expect-error document.fonts exists in headless chrome
       if (document.fonts && document.fonts.ready) await document.fonts.ready;
     });
     await page.waitForFunction(
-      // @ts-expect-error window prop
       "window.__mermaidReady === true",
       { timeout: 30000 },
     );

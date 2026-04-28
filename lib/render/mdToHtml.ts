@@ -81,10 +81,13 @@ const rewriteLinksAndImages =
           const slug = fileSlugs.get(target);
           if (slug) {
             node.properties.href = "#" + slug + (hash ? "--" + hash : "");
-            return;
+          } else {
+            const rewritten = pathPart.replace(/\.(md|markdown)$/i, ".pdf");
+            node.properties.href = rewritten + (hash ? "#" + hash : "");
           }
-          const rewritten = pathPart.replace(/\.(md|markdown)$/i, ".pdf");
-          node.properties.href = rewritten + (hash ? "#" + hash : "");
+          visit(node, "text", (textNode) => {
+            textNode.value = textNode.value.replace(/\.(md|markdown)\b/gi, ".pdf");
+          });
           return;
         }
         if (!pathPart && hash) {

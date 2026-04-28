@@ -5,7 +5,10 @@ export async function htmlToPdf(html: string): Promise<Buffer> {
   const page = await browser.newPage();
   try {
     await page.emulateMediaType("print");
-    await page.setContent(html, { waitUntil: "networkidle0", timeout: 45000 });
+    // Use a data: URL via goto rather than setContent so Chromium emits internal
+    // PDF link annotations for in-document `#anchor` hrefs.
+    const dataUrl = `data:text/html;charset=utf-8;base64,${Buffer.from(html, "utf8").toString("base64")}`;
+    await page.goto(dataUrl, { waitUntil: "networkidle0", timeout: 45000 });
     // Wait for fonts and mermaid to settle
     await page.evaluate(async () => {
       // @ts-expect-error document.fonts exists in headless chrome

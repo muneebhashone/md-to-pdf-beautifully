@@ -91,9 +91,12 @@ const rewriteLinksAndImages =
           return;
         }
         if (!pathPart && hash) {
-          // same-file anchor; leave as-is but prefix with current file slug for global uniqueness
+          // same-file anchor; prefix with current file slug for global uniqueness,
+          // unless the hash is already prefixed (e.g. rehype-autolink-headings ran after prefixHeadingIds).
           const cur = fileSlugs.get(currentFile);
-          if (cur) node.properties.href = "#" + cur + "--" + hash;
+          if (cur && !hash.startsWith(cur + "--")) {
+            node.properties.href = "#" + cur + "--" + hash;
+          }
           return;
         }
       }

@@ -97,6 +97,7 @@ function validateFiles(files: File[]): Validation {
 export default function Home() {
   const [mode, setMode] = useState<Mode>({ kind: "idle" });
   const [dragOver, setDragOver] = useState(false);
+  const [markdownText, setMarkdownText] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   const acceptFiles = useCallback((list: FileList | null | undefined) => {
@@ -157,7 +158,26 @@ export default function Home() {
 
   const reset = () => {
     setMode({ kind: "idle" });
+    setMarkdownText("");
     if (inputRef.current) inputRef.current.value = "";
+  };
+
+  const useMarkdownText = () => {
+    const content = markdownText.trim();
+    if (!content) {
+      setMode({ kind: "idle", error: "Paste markdown content first" });
+      return;
+    }
+
+    const file = new File([markdownText], "pasted-markdown.md", {
+      type: "text/markdown",
+    });
+    setMode({
+      kind: "single",
+      file,
+      previewing: false,
+      converting: false,
+    });
   };
 
   // ---------- Single-file flow ----------
@@ -377,7 +397,8 @@ export default function Home() {
             Markdown → PDF
           </h1>
           <p className="mt-4 text-zinc-600 dark:text-zinc-400 text-lg">
-            Drop a <code className="font-mono text-sm">.md</code> file, or a{" "}
+            Paste markdown directly, drop a{" "}
+            <code className="font-mono text-sm">.md</code> file, or a{" "}
             <code className="font-mono text-sm">.zip</code> bundle with images
             and linked markdown. Drop multiple files to batch-convert.
           </p>
@@ -439,6 +460,9 @@ export default function Home() {
             onPreview={previewSingle}
             onConvert={convertSingle}
             onClear={reset}
+            markdownText={markdownText}
+            onMarkdownTextChange={setMarkdownText}
+            onUseMarkdownText={useMarkdownText}
           />
         )}
 
@@ -468,6 +492,9 @@ function SingleOrIdleView({
   onPreview,
   onConvert,
   onClear,
+  markdownText,
+  onMarkdownTextChange,
+  onUseMarkdownText,
 }: {
   mode: Mode;
   dragOver: boolean;
@@ -477,6 +504,9 @@ function SingleOrIdleView({
   onPreview: () => void;
   onConvert: () => void;
   onClear: () => void;
+  markdownText: string;
+  onMarkdownTextChange: (value: string) => void;
+  onUseMarkdownText: () => void;
 }) {
   const file = mode.kind === "single" ? mode.file : null;
   const busy =
@@ -487,6 +517,37 @@ function SingleOrIdleView({
 
   return (
     <>
+      {!file && (
+        <div className="mb-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/50 p-4 shadow-sm">
+          <label
+            htmlFor="markdown-input"
+            className="block text-sm font-medium text-zinc-800 dark:text-zinc-200"
+          >
+            Paste markdown
+          </label>
+          <textarea
+            id="markdown-input"
+            value={markdownText}
+            onChange={(e) => onMarkdownTextChange(e.target.value)}
+            placeholder="# Your document&#10;&#10;Paste markdown here, then preview or generate it as a PDF."
+            className="mt-3 min-h-44 w-full resize-y rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-black/30 px-4 py-3 font-mono text-sm leading-6 text-zinc-900 dark:text-zinc-100 outline-none transition focus:border-zinc-400 dark:focus:border-zinc-600"
+          />
+          <div className="mt-3 flex items-center justify-between gap-3">
+            <p className="text-xs text-zinc-500">
+              Uses the same PDF pipeline as uploaded markdown files.
+            </p>
+            <button
+              type="button"
+              onClick={onUseMarkdownText}
+              disabled={!markdownText.trim()}
+              className="inline-flex h-10 shrink-0 items-center justify-center rounded-full bg-zinc-900 px-5 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-300 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:disabled:bg-zinc-800"
+            >
+              Use pasted markdown
+            </button>
+          </div>
+        </div>
+      )}
+
       <div
         onDragOver={(e) => {
           e.preventDefault();

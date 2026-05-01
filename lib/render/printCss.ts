@@ -72,6 +72,7 @@ pre {
   font-family: var(--mono);
   font-size: 9.5pt;
   line-height: 1.5;
+  text-align: left;
   background: var(--code-bg);
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -122,6 +123,7 @@ figcaption { font-size: 9pt; color: var(--muted); margin-top: 0.4em; }
 .mermaid-wrapper > svg { max-width: 100% !important; }
 
 /* shiki theming */
+[data-rehype-pretty-code-figure] { text-align: left; }
 [data-rehype-pretty-code-figure] pre { background: var(--code-bg); }
 [data-line] { padding: 0 0.2em; }
 
